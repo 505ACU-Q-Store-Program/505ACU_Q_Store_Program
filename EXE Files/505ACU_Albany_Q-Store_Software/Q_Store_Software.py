@@ -8,6 +8,7 @@ import customtkinter as ctk
 from tkcalendar import DateEntry
 import os
 import csv
+import __main__
 
 connection = sqlite3.connect("505_ACU_Q-Store_Database.db")
 

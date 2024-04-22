@@ -1,13 +1,7 @@
 from tkinter import *
-from tkinter import ttk
-import datetime
-import re
 import sqlite3
-from contextlib import closing
 import customtkinter as ctk
-from tkcalendar import DateEntry
 import os
-import csv
 
 connection = sqlite3.connect("505_ACU_Q-Store_Database.db")
 
@@ -79,8 +73,6 @@ leftBottomFrame.grid(row=1, column=0, sticky="nsew", pady=standardYPadding)
 leftBottomFrame.grid_propagate(False)
 leftBottomFrame.pack_propagate(False)
 
-
 import startLogin
+startLogin
 
-
-root.mainloop()

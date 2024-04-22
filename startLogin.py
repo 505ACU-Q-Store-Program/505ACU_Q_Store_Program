@@ -1,14 +1,8 @@
 from tkinter import *
-from tkinter import ttk
 import datetime
-import re
 import sqlite3
-from contextlib import closing
 import customtkinter as ctk
-from tkcalendar import DateEntry
-import os
-import csv
-from main import leftTopFrame, standardFont, standardYPadding
+from main import root, leftTopFrame, standardFont, standardYPadding, standardWidth, standardHeight
 
 connection = sqlite3.connect("505_ACU_Q-Store_Database.db")
 
@@ -25,7 +19,7 @@ class LoginWindow:
         for widget in self.frame.winfo_children():
             widget.destroy()
 
-        password_label = ctk.CTkLabel(self.frame, text="Please Enter Your \n Username And Password", font=self.font)
+        password_label = ctk.CTkLabel(self.frame,text="Please Enter Your \n Username And Password", font=self.font)
         password_label.pack(pady=self.y_padding)
 
         username_entry = ctk.CTkEntry(self.frame, placeholder_text="Enter Username", font=self.font, width=self.width, height=self.height)
@@ -139,5 +133,7 @@ class PasswordRetrievalWindow:
         return_button = ctk.CTkButton(self.frame, text="Return to Log In Page", font=self.font, width=self.width, height=self.height, command=lambda: LoginWindow(self.root, self.frame, self.font, self.width, self.height, self.y_padding).create())
         return_button.pack(pady=self.y_padding)
 
+logInWindow1 = LoginWindow(root, leftTopFrame, standardFont, standardWidth, standardHeight, standardYPadding)
+logInWindow1.create()
 
-LoginWindow.create()
+root.mainloop()

@@ -79,12 +79,11 @@ leftBottomFrame.grid(row=1, column=0, sticky="nsew", pady=standardYPadding)
 leftBottomFrame.grid_propagate(False)
 leftBottomFrame.pack_propagate(False)
 
-
-def Date(date):
+def Date():
     date = datetime.datetime.now().strftime("%d/%m/%Y")
     return date
 
-def Time(time):
+def Time():
     time = datetime.datetime.now().strftime("%H:%M:%S")
     return time
 
@@ -157,9 +156,12 @@ class Authentication:
         else:
             user_password = connection.cursor().execute(f"SELECT Password FROM Accounts WHERE Username= '{user_username}'").fetchone()[0]
             user_entered_password = password_entry.get()
+            global loggedInAccountID
+            loggedInAccountID = connection.cursor().execute(f"SELECT AccountID FROM Accounts WHERE Username= '{user_username}'").fetchone()[0]
 
             if user_entered_password != user_password:
-                Authentication.log_action(user_username, 3, user_entered_password)
+                actionLog3 = ActionLogs(loggedInAccountID, 3, "N/A", "N/A", user_entered_password, "N/A")
+                actionLog3.createLog()
                 for widget in leftTopFrame.winfo_children():
                     widget.destroy()
                 passwordErrorLabel = ctk.CTkLabel(
@@ -182,18 +184,9 @@ class Authentication:
 
             else:
                 
-                global loggedInAccountID
-                loggedInAccountID = connection.cursor().execute(f"SELECT AccountID FROM Accounts WHERE Username= '{user_username}'").fetchone()[0]
-                Authentication.log_action(loggedInAccountID, 1)
+                actionLog1 = ActionLogs(loggedInAccountID, 1, "N/A", "N/A", "N/A", "N/A")
+                actionLog1.createLog()
                 print("got to end")
-
-    def log_action(loggedInAccountID, action_id, user_input=None):
-        date = datetime.datetime.now().strftime("%d/%m/%Y")
-        time = datetime.datetime.now().strftime("%H:%M:%S")
-        before = after = remarks = "N/A"
-
-        connection.cursor().execute(f"INSERT INTO ActionsLogs (AccountID, Date, Time, ActionID, Before, After, User_Input, Remarks) VALUES ('{loggedInAccountID}', '{date}', '{time}', '{action_id}', '{before}', '{after}', '{user_input}', '{remarks}')")
-        connection.commit()
 
 class ForgotPassword:
     def __init__(self, root, frame, font, width, height, y_padding):
@@ -260,7 +253,5 @@ class PasswordRetrievalWindow:
 
 logInWindow1 = LoginWindow(root, leftTopFrame, standardFont, standardWidth, standardHeight, standardYPadding)
 logInWindow1.create()
-
-actionLog1 = ActionLogs(loggedInAccountID, )
 
 root.mainloop()

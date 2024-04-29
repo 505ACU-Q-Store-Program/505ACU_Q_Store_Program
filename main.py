@@ -1,7 +1,13 @@
 from tkinter import *
+from tkinter import ttk
+import datetime
+import re
 import sqlite3
+from contextlib import closing
 import customtkinter as ctk
+from tkcalendar import DateEntry
 import os
+import csv
 
 connection = sqlite3.connect("505_ACU_Q-Store_Database.db")
 
@@ -73,6 +79,188 @@ leftBottomFrame.grid(row=1, column=0, sticky="nsew", pady=standardYPadding)
 leftBottomFrame.grid_propagate(False)
 leftBottomFrame.pack_propagate(False)
 
-import startLogin
-startLogin
 
+def Date(date):
+    date = datetime.datetime.now().strftime("%d/%m/%Y")
+    return date
+
+def Time(time):
+    time = datetime.datetime.now().strftime("%H:%M:%S")
+    return time
+
+class ActionLogs:
+    def __init__(self, loggedInAccountID, actionID, before, after, userInput, remarks):
+        self.accountID = loggedInAccountID
+        self.date = Date()
+        self.time = Time()
+        self.actionID = actionID
+        self.before = before
+        self.after = after
+        self.userInput = userInput
+        self.remarks = remarks
+        
+    def createLog(self):
+        connection.cursor().execute(f"INSERT INTO ActionsLogs (AccountID,Date,Time,ActionID,Before,After,User_Input,Remarks) VALUES ('{self.accountID}','{self.date}','{self.time}','{self.actionID}','{self.before}','{self.after}','{self.userInput}','{self.remarks}')").fetchall()
+        connection.commit()
+
+class LoginWindow:
+    def __init__(self, root, frame, font, width, height, y_padding):
+        self.root = root
+        self.frame = frame
+        self.font = font
+        self.width = width
+        self.height = height
+        self.y_padding = y_padding
+
+    def create(self):
+        for widget in self.frame.winfo_children():
+            widget.destroy()
+
+        password_label = ctk.CTkLabel(self.frame,text="Please Enter Your \n Username And Password", font=self.font)
+        password_label.pack(pady=self.y_padding)
+
+        username_entry = ctk.CTkEntry(self.frame, placeholder_text="Enter Username", font=self.font, width=self.width, height=self.height)
+        username_entry.pack(pady=self.y_padding)
+
+        password_entry = ctk.CTkEntry(self.frame, placeholder_text="Enter Password", font=self.font, width=self.width, height=self.height, show='*')
+        password_entry.pack(pady=self.y_padding)
+
+        login_button = ctk.CTkButton(self.frame, text="Log In", font=self.font, width=self.width, height=self.height, command=lambda: Authentication.login(username_entry, password_entry))
+        login_button.pack(pady=self.y_padding)
+
+        forgot_password_button = ctk.CTkButton(self.frame, text="Forgot the Password", font=self.font, width=self.width, height=self.height, command=ForgotPassword(self.root, self.frame, self.font, self.width, self.height, self.y_padding).create)
+        forgot_password_button.pack(pady=self.y_padding)
+
+        close_button = ctk.CTkButton(self.frame, text="Close Window", font=self.font, width=self.width, height=self.height, command=self.root.destroy)
+        close_button.pack(pady=self.y_padding)
+
+class Authentication:
+    def login(username_entry, password_entry):
+        usernames = str(connection.cursor().execute("SELECT Username FROM Accounts").fetchall()).replace("(","").replace(")","").replace("'","").replace(",","").replace(" ",",")
+        user_username = username_entry.get()
+        if user_username not in usernames:
+            for widget in leftTopFrame.winfo_children():
+                widget.destroy()
+            idk = ctk.CTkLabel(leftTopFrame, text="Incorrect Username. \n Return to log in page and try again.", font = standardFont)
+            idk.pack(pady = standardYPadding)
+
+            passwordErrorButton = ctk.CTkButton(
+            leftTopFrame,
+            text="Return to Log In Page",
+            font=standardFont,
+            width=standardWidth,
+            height=standardHeight,
+            command=logInWindow1.create()
+            )
+            passwordErrorButton.pack(pady=standardYPadding)
+
+        else:
+            user_password = connection.cursor().execute(f"SELECT Password FROM Accounts WHERE Username= '{user_username}'").fetchone()[0]
+            user_entered_password = password_entry.get()
+
+            if user_entered_password != user_password:
+                Authentication.log_action(user_username, 3, user_entered_password)
+                for widget in leftTopFrame.winfo_children():
+                    widget.destroy()
+                passwordErrorLabel = ctk.CTkLabel(
+                leftTopFrame,
+                text="Incorrect Password. Return to log in page and try again.",
+                font=standardFont
+                )
+                passwordErrorLabel.pack(pady=standardYPadding)
+
+                # Creates a ctk button
+                passwordErrorButton = ctk.CTkButton(
+                    leftTopFrame,
+                    text="Return to Log In Page",
+                    font=standardFont,
+                    width=standardWidth,
+                    height=standardHeight,
+                    command=logInWindow1.create()
+                )
+                passwordErrorButton.pack(pady=standardYPadding)
+
+            else:
+                
+                global loggedInAccountID
+                loggedInAccountID = connection.cursor().execute(f"SELECT AccountID FROM Accounts WHERE Username= '{user_username}'").fetchone()[0]
+                Authentication.log_action(loggedInAccountID, 1)
+                print("got to end")
+
+    def log_action(loggedInAccountID, action_id, user_input=None):
+        date = datetime.datetime.now().strftime("%d/%m/%Y")
+        time = datetime.datetime.now().strftime("%H:%M:%S")
+        before = after = remarks = "N/A"
+
+        connection.cursor().execute(f"INSERT INTO ActionsLogs (AccountID, Date, Time, ActionID, Before, After, User_Input, Remarks) VALUES ('{loggedInAccountID}', '{date}', '{time}', '{action_id}', '{before}', '{after}', '{user_input}', '{remarks}')")
+        connection.commit()
+
+class ForgotPassword:
+    def __init__(self, root, frame, font, width, height, y_padding):
+        self.root = root
+        self.frame = frame
+        self.font = font
+        self.width = width
+        self.height = height
+        self.y_padding = y_padding
+
+    def create(self):
+        for widget in self.frame.winfo_children():
+            widget.destroy()
+
+        username_entry = ctk.CTkEntry(self.frame, placeholder_text="Enter Username", font=self.font, width=self.width, height=self.height)
+        username_entry.pack(pady=self.y_padding)
+
+        next_button = ctk.CTkButton(self.frame, text="Next", font=self.font, width=self.width, height=self.height, command=lambda: self.get_password(username_entry))
+        next_button.pack(pady=self.y_padding)
+
+        return_button = ctk.CTkButton(self.frame, text="Return to Log In Page", font=self.font, width=self.width, height=self.height, command=lambda: LoginWindow(self.root, self.frame, self.font, self.width, self.height, self.y_padding).create())
+        return_button.pack(pady=self.y_padding)
+
+    def get_password(self, username_entry):
+        usernames = [row[0] for row in connection.cursor().execute("SELECT Username FROM Accounts").fetchall()]
+        user_username = username_entry.get()
+
+        if user_username not in usernames:
+            for widget in leftTopFrame.winfo_children():
+                widget.destroy()
+            idk = ctk.CTkLabel(leftTopFrame, text="idk", font = standardFont)
+            idk.pack(pady = standardYPadding)
+            account_data = connection.cursor().execute(f"SELECT Secret_Question, Secret_Question_Answer, Password FROM Accounts WHERE Username = '{user_username}'").fetchone()
+            PasswordRetrievalWindow(self.root, self.frame, self.font, self.width, self.height, self.y_padding, account_data, user_username).create()
+
+class PasswordRetrievalWindow:
+    def __init__(self, root, frame, font, width, height, y_padding, account_data, username):
+        self.root = root
+        self.frame = frame
+        self.font = font
+        self.width = width
+        self.height = height
+        self.y_padding = y_padding
+        self.account_data = account_data
+        self.username = username
+
+    def create(self):
+        for widget in self.frame.winfo_children():
+            widget.destroy()
+
+        question_label = ctk.CTkLabel(self.frame, text=f"The secret question is: \n{self.account_data[0]}", fg_color="transparent", font=self.font)
+        question_label.pack(pady=self.y_padding)
+
+        answer_entry = ctk.CTkEntry(self.frame, placeholder_text="Enter the Answer to the Question", font=self.font, width=self.width, height=self.height)
+        answer_entry.pack(pady=self.y_padding)
+
+        submit_button = ctk.CTkButton(self.frame, text="Submit Answer", font=self.font, width=self.width, height=self.height, command=lambda: self.check_answer(answer_entry))
+        submit_button.pack(pady=self.y_padding)
+
+        return_button = ctk.CTkButton(self.frame, text="Return to Log In Page", font=self.font, width=self.width, height=self.height, command=lambda: LoginWindow(self.root, self.frame, self.font, self.width, self.height, self.y_padding).create())
+        return_button.pack(pady=self.y_padding)
+
+
+
+logInWindow1 = LoginWindow(root, leftTopFrame, standardFont, standardWidth, standardHeight, standardYPadding)
+logInWindow1.create()
+
+actionLog1 = ActionLogs(loggedInAccountID, )
+
+root.mainloop()

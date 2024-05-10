@@ -305,6 +305,13 @@ class PasswordDisplayWindow:
         return_button = ctk.CTkButton(self.frame, text="Return to Log In Page", font=self.font, width=self.width, height=self.height, command=lambda: LoginWindow(self.root, self.frame, self.font, self.width, self.height, self.y_padding).create())
         return_button.pack(pady=self.y_padding)
 
+#===================================================================================================================
+
+
+
+
+
+
 
 logInWindow1 = LoginWindow(root, leftTopFrame, standardFont, standardWidth, standardHeight, standardYPadding)
 logInWindow1.create()

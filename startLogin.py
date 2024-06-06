@@ -80,6 +80,9 @@ leftBottomFrame.grid(row=1, column=0, sticky="nsew", pady=standardYPadding)
 leftBottomFrame.grid_propagate(False)
 leftBottomFrame.pack_propagate(False)
 
+def main():
+    logInWindow1.create()
+
 def Date():
     date = datetime.datetime.now().strftime("%d/%m/%Y")
     return date
@@ -310,6 +313,6 @@ class PasswordDisplayWindow:
 #===================================================================================================================
 
 logInWindow1 = LoginWindow(root, leftTopFrame, standardFont, standardWidth, standardHeight, standardYPadding)
-logInWindow1.create()
+
 
 root.mainloop()

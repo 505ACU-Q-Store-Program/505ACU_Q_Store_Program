@@ -42,9 +42,9 @@ root = ctk.CTk()
 #root.attributes("-fullscreen", True)
 #root.protocol("WM_DELETE_WINDOW", disable_event)
 root.title("505ACU Albany Q-Store Software Version: 0.9")
-#screenWidth = root.winfo_screenwidth()
-#screenHeight = root.winfo_screenheight()
-#root.geometry(f"{screenWidth}x{screenHeight}")
+screenWidth = root.winfo_screenwidth()
+screenHeight = root.winfo_screenheight()
+root.geometry(f"{screenWidth}x{screenHeight}")
 #root.state('zoomed')
 
 # Creating the main frame

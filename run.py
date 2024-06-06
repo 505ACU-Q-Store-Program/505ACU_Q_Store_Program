@@ -3,7 +3,7 @@ import test
 
 def main():
     validity = False
-    validity = startLogin
+    validity = startLogin.main()
     print("Got This Far")
     print(validity)
     if validity == True:

@@ -32,6 +32,28 @@ screen_height = root.winfo_screenheight()
 root.geometry(f"500x500")
 root.resizable(False, False)
 
+class ErrorWindow:
+    def __init__(self,parent,message,on_close):
+        self.parent = parent
+        self.message = message
+        self.on_close = on_close
+
+    def create(self):
+        error_window = ctk.CTkToplevel(self.parent)
+        error_window.title("Error")
+
+        error_label = ctk.CTkLabel(
+            error_window,
+            text=self.message,
+            font=standard_font)
+        error_label.pack(pady=standard_y_padding)
+
+        close_button = ctk.CTkButton(
+            error_window,
+            text="Close",
+            command=lambda: [error_window.destroy(),self.on_close()])
+        close_button.pack(pady=standard_y_padding)
+
 class LogInWindow:
     def __init__(self, root, standard_y_padding, standard_font, standard_height, standard_width):
         self.root = root
@@ -63,13 +85,15 @@ class LogInWindow:
             show='*')
         password_entry.pack(pady=self.y_padding)
 
+        button_type = ["login",username_entry,password_entry]
+
         login_button = ctk.CTkButton(
             self.root,
             text="Log In",
             font=self.font,
             width=self.width,
             height=self.height,
-            command=lambda: main(f"login,{username_entry},{password_entry}"))
+            command=lambda: main(button_type))
         login_button.pack(pady=self.y_padding)
 
         forgot_password_button = ctk.CTkButton(
@@ -78,7 +102,7 @@ class LogInWindow:
             font=self.font,
             width=self.width,
             height=self.height,
-            command=lambda: main(f"forgot_password,{username_entry},{password_entry}"))
+            command=lambda: main(button_type))
         forgot_password_button.pack(pady=self.y_padding)
 
         close_button = ctk.CTkButton(
@@ -119,32 +143,36 @@ class LogIn:
 
 
 
-def main(button_type):
+def main(button_type): 
     log_in_window_1 = LogInWindow(root, standard_y_padding, standard_font, standard_height, standard_width)
-    log_in_window_1.create_widgets()
 
-    print(str(button_type))
-    if button_type != None:    
-        button_value = str(button_type).split(",")[0]
-        username_entry = str(button_type).split(",")[1]
-        password_entry = str(button_type).split(",")[2]
-        username_in_usernames = ""
+    if button_type == None:
+        log_in_window_1.create_widgets()
+        print(button_type)
+    else:    
+        button_value = button_type[0]
+        username_entry = button_type[1]
+        password_entry = button_type[2]
 
-    if button_value == "login":
         log_in_1 = LogIn(username_entry, password_entry)
-        if log_in_1.username_checker() == True:
-            log_in_2 = LogIn(username_entry, password_entry)
-            if log_in_2.password_checker() == True:
-                pass
-            else:
-                pass
-        else:
-            pass
+        log_in_2 = LogIn(username_entry, password_entry)
+        ###################################ErrorWindow(root, "Your answer does not match the correct answer", lambda: ForgotPassword(self.root, self.frame, self.font, self.width, self.height, self.y_padding).create())
 
-    elif button_value == "forgot_password":
-        pass
-    else:
-        print("got to end")
+
+        if button_value == "login":
+            if log_in_1.username_checker() == True:
+                if log_in_2.password_checker() == True:
+                    print("yay1")
+                else:
+                    pass
+            else:
+                print("yay3")
+
+        elif button_value == "forgot_password":
+            pass
+        else:
+            print("got to end")
+
 
 
 
@@ -154,6 +182,6 @@ def main(button_type):
 
 
 if __name__ == "__main__":
-    main(button_type=None)
+    main(button_type = None)
 
 root.mainloop()

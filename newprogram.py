@@ -29,8 +29,65 @@ root = ctk.CTk()
 root.title("505ACU Albany Q-Store Software Version: 0.9")
 screen_width = root.winfo_screenwidth()
 screen_height = root.winfo_screenheight()
-root.geometry(f"500x500")
+root.geometry(f"500x275")
 root.resizable(False, False)
+
+def log_in_window():
+
+    for widget in root.winfo_children():
+        widget.destroy()
+    
+    password_label = ctk.CTkLabel(
+        root,
+        text="Please Enter Your \n Username And Password",
+        font=standard_font)
+    password_label.pack(pady=standard_y_padding)
+
+    username_entry = ctk.CTkEntry(
+        root,
+        placeholder_text="Enter Username",
+        font=standard_font,
+        width=standard_width,
+        height=standard_height)
+    username_entry.pack(pady=standard_y_padding)
+
+    password_entry = ctk.CTkEntry(
+        root,
+        placeholder_text="Enter Password",
+        font=standard_font,
+        width=standard_width,
+        height=standard_height,
+        show='*')
+    password_entry.pack(pady=standard_y_padding)
+
+    button_type = ["login",username_entry,password_entry]
+
+    login_button = ctk.CTkButton(
+        root,
+        text="Log In",
+        font=standard_font,
+        width=standard_width,
+        height=standard_height,
+        command=lambda: main(button_type))
+    login_button.pack(pady=standard_y_padding)
+
+    forgot_password_button = ctk.CTkButton(
+        root,
+        text="Forgot the Password",
+        font=standard_font,
+        width=standard_width,
+        height=standard_height,
+        command=lambda: main(button_type))
+    forgot_password_button.pack(pady=standard_y_padding)
+
+    close_button = ctk.CTkButton(
+        root,
+        text="Close Window",
+        font=standard_font,
+        width=standard_width,
+        height=standard_height,
+        command=root.destroy)
+    close_button.pack(pady=standard_y_padding)
 
 class ErrorWindow:
     def __init__(self,parent,message,on_close):
@@ -41,6 +98,7 @@ class ErrorWindow:
     def create(self):
         error_window = ctk.CTkToplevel(self.parent)
         error_window.title("Error")
+        error_window.resizable(False, False)
 
         error_label = ctk.CTkLabel(
             error_window,
@@ -51,68 +109,11 @@ class ErrorWindow:
         close_button = ctk.CTkButton(
             error_window,
             text="Close",
+            font=standard_font,
+            width=standard_width,
+            height=standard_height,
             command=lambda: [error_window.destroy(),self.on_close()])
         close_button.pack(pady=standard_y_padding)
-
-class LogInWindow:
-    def __init__(self, root, standard_y_padding, standard_font, standard_height, standard_width):
-        self.root = root
-        self.y_padding = standard_y_padding
-        self.font = standard_font
-        self.height = standard_height
-        self.width = standard_width
-
-    def create_widgets(self):
-        password_label = ctk.CTkLabel(
-            self.root,
-            text="Please Enter Your \n Username And Password",
-            font=self.font)
-        password_label.pack(pady=self.y_padding)
-
-        username_entry = ctk.CTkEntry(
-            self.root,
-            placeholder_text="Enter Username",
-            font=self.font, width=self.width,
-            height=self.height)
-        username_entry.pack(pady=self.y_padding)
-
-        password_entry = ctk.CTkEntry(
-            self.root,
-            placeholder_text="Enter Password",
-            font=self.font,
-            width=self.width,
-            height=self.height,
-            show='*')
-        password_entry.pack(pady=self.y_padding)
-
-        button_type = ["login",username_entry,password_entry]
-
-        login_button = ctk.CTkButton(
-            self.root,
-            text="Log In",
-            font=self.font,
-            width=self.width,
-            height=self.height,
-            command=lambda: main(button_type))
-        login_button.pack(pady=self.y_padding)
-
-        forgot_password_button = ctk.CTkButton(
-            self.root,
-            text="Forgot the Password",
-            font=self.font,
-            width=self.width,
-            height=self.height,
-            command=lambda: main(button_type))
-        forgot_password_button.pack(pady=self.y_padding)
-
-        close_button = ctk.CTkButton(
-            self.root,
-            text="Close Window",
-            font=self.font,
-            width=self.width,
-            height=self.height,
-            command=self.root.destroy)
-        close_button.pack(pady=self.y_padding)
 
 class LogIn:
     def __init__(self, username_entry, password_entry):
@@ -144,11 +145,8 @@ class LogIn:
 
 
 def main(button_type): 
-    log_in_window_1 = LogInWindow(root, standard_y_padding, standard_font, standard_height, standard_width)
-
     if button_type == None:
-        log_in_window_1.create_widgets()
-        print(button_type)
+        log_in_window()
     else:    
         button_value = button_type[0]
         username_entry = button_type[1]
@@ -156,22 +154,22 @@ def main(button_type):
 
         log_in_1 = LogIn(username_entry, password_entry)
         log_in_2 = LogIn(username_entry, password_entry)
-        ###################################ErrorWindow(root, "Your answer does not match the correct answer", lambda: ForgotPassword(self.root, self.frame, self.font, self.width, self.height, self.y_padding).create())
-
+        error_window_1 = ErrorWindow(root, "Your password or username was incorect.\nPlease go back and try again.", lambda: log_in_window())
+        error_window_2 = ErrorWindow(root, "We encountered a problem, please try again.", lambda: log_in_window())
 
         if button_value == "login":
             if log_in_1.username_checker() == True:
                 if log_in_2.password_checker() == True:
                     print("yay1")
                 else:
-                    pass
+                    error_window_1.create()
             else:
-                print("yay3")
+                error_window_1.create()
 
         elif button_value == "forgot_password":
             pass
         else:
-            print("got to end")
+            error_window_2.create()
 
 
 

@@ -60,15 +60,13 @@ def log_in_window():
         show='*')
     password_entry.pack(pady=standard_y_padding)
 
-    button_type = ["login",username_entry,password_entry]
-
     login_button = ctk.CTkButton(
         root,
         text="Log In",
         font=standard_font,
         width=standard_width,
         height=standard_height,
-        command=lambda: main(button_type))
+        command=lambda: main(button_type = ["login",username_entry,password_entry,"N/A"]))
     login_button.pack(pady=standard_y_padding)
 
     forgot_password_button = ctk.CTkButton(
@@ -77,7 +75,7 @@ def log_in_window():
         font=standard_font,
         width=standard_width,
         height=standard_height,
-        command=lambda: main(button_type))
+        command=lambda: main(button_type = ["forgot_password",username_entry,password_entry,"N/A"]))
     forgot_password_button.pack(pady=standard_y_padding)
 
     close_button = ctk.CTkButton(
@@ -87,6 +85,42 @@ def log_in_window():
         width=standard_width,
         height=standard_height,
         command=root.destroy)
+    close_button.pack(pady=standard_y_padding)
+
+def forgot_password_window():
+    for widget in root.winfo_children():
+        widget.destroy()
+
+    username_label = ctk.CTkLabel(
+        root,
+        text="Please Enter Your Username",
+        font=standard_font)
+    username_label.pack(pady=standard_y_padding)
+
+    username_entry = ctk.CTkEntry(
+        root,
+        placeholder_text="Enter Username",
+        font=standard_font,
+        width=standard_width,
+        height=standard_height)
+    username_entry.pack(pady=standard_y_padding)
+
+    continue_button = ctk.CTkButton(
+        root,
+        text="Continue",
+        font=standard_font,
+        width=standard_width,
+        height=standard_height,
+        command=lambda: main(button_type = ["forgot_password",username_entry,"N/A","continue"]))
+    continue_button.pack(pady=standard_y_padding)
+
+    close_button = ctk.CTkButton(
+        root,
+        text="Go Back to Login",
+        font=standard_font,
+        width=standard_width,
+        height=standard_height,
+        command=lambda:main(button_type=None))
     close_button.pack(pady=standard_y_padding)
 
 class ErrorWindow:
@@ -141,22 +175,34 @@ class LogIn:
             correct_password = True
             return correct_password
 
+class SecretQuestion:
+    def __init__(self, username):
+        self.username = username
 
+    def get_secret_question(self):
+        secret_question = connection.cursor().execute(f"SELECT Secret_Question FROM Accounts WHERE Username = '{self.username}'").fetchone()
+        return secret_question
+    
+    
 
 
 def main(button_type): 
+    for widget in root.winfo_children():
+        widget.destroy()
+
+    button_value = button_type[0]
+    username_entry = button_type[1]
+    password_entry = button_type[2]
+    other_value = button_type[3]
+
+    log_in_1 = LogIn(username_entry, password_entry)
+    log_in_2 = LogIn(username_entry, password_entry)
+    error_window_1 = ErrorWindow(root, "Your password or username was incorect.\nPlease go back and try again.", lambda: log_in_window())
+    error_window_2 = ErrorWindow(root, "We encountered a problem, please try again.", lambda: log_in_window())
+
     if button_type == None:
         log_in_window()
     else:    
-        button_value = button_type[0]
-        username_entry = button_type[1]
-        password_entry = button_type[2]
-
-        log_in_1 = LogIn(username_entry, password_entry)
-        log_in_2 = LogIn(username_entry, password_entry)
-        error_window_1 = ErrorWindow(root, "Your password or username was incorect.\nPlease go back and try again.", lambda: log_in_window())
-        error_window_2 = ErrorWindow(root, "We encountered a problem, please try again.", lambda: log_in_window())
-
         if button_value == "login":
             if log_in_1.username_checker() == True:
                 if log_in_2.password_checker() == True:
@@ -167,11 +213,14 @@ def main(button_type):
                 error_window_1.create()
 
         elif button_value == "forgot_password":
-            pass
+            if other_value == "N/A":
+                forgot_password_window()
+            elif other_value == "continue":
+                pass
+            else:
+                error_window_2.create()
         else:
             error_window_2.create()
-
-
 
 
 

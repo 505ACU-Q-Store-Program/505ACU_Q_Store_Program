@@ -66,7 +66,7 @@ def log_in_window():
         font=standard_font,
         width=standard_width,
         height=standard_height,
-        command=lambda: main(button_type = ["login",username_entry,password_entry,"N/A"]))
+        command=lambda: main(button_type = ["login",username_entry.get(),password_entry.get(),"N/A","N/A"]))
     login_button.pack(pady=standard_y_padding)
 
     forgot_password_button = ctk.CTkButton(
@@ -75,7 +75,7 @@ def log_in_window():
         font=standard_font,
         width=standard_width,
         height=standard_height,
-        command=lambda: main(button_type = ["forgot_password",username_entry,password_entry,"N/A"]))
+        command=lambda: main(button_type = ["forgot_password",username_entry.get(),password_entry.get(),"N/A","N/A"]))
     forgot_password_button.pack(pady=standard_y_padding)
 
     close_button = ctk.CTkButton(
@@ -111,8 +111,65 @@ def forgot_password_window():
         font=standard_font,
         width=standard_width,
         height=standard_height,
-        command=lambda: main(button_type = ["forgot_password",username_entry,"N/A","continue"]))
+        command=lambda: main(button_type = ["forgot_password",username_entry.get(),"N/A","continue","N/A"]))
     continue_button.pack(pady=standard_y_padding)
+
+    close_button = ctk.CTkButton(
+        root,
+        text="Go Back to Login",
+        font=standard_font,
+        width=standard_width,
+        height=standard_height,
+        command=lambda:main(button_type=None))
+    close_button.pack(pady=standard_y_padding)
+
+def secret_question_window(secret_question):
+    for widget in root.winfo_children():
+        widget.destroy()
+
+    secret_question = str(secret_question)
+
+    secret_question_label = ctk.CTkLabel(
+        root,
+        text=secret_question,
+        font=standard_font)
+    secret_question_label.pack(pady=standard_y_padding)
+
+    secret_question_entry = ctk.CTkEntry(
+        root,
+        placeholder_text="Enter answer",
+        font=standard_font,
+        width=standard_width,
+        height=standard_height)
+    secret_question_entry.pack(pady=standard_y_padding)
+
+    continue_button = ctk.CTkButton(
+        root,
+        text="Continue",
+        font=standard_font,
+        width=standard_width,
+        height=standard_height,
+        command=lambda: main(button_type = ["forgot_password","N/A","N/A","continue",secret_question_entry.get()]))
+    continue_button.pack(pady=standard_y_padding)
+
+    close_button = ctk.CTkButton(
+        root,
+        text="Go Back to Login",
+        font=standard_font,
+        width=standard_width,
+        height=standard_height,
+        command=lambda:main(button_type=None))
+    close_button.pack(pady=standard_y_padding)
+
+def display_user_password_window():
+    for widget in root.winfo_children():
+        widget.destroy()
+
+    display_password_label = ctk.CTkLabel(
+        root,
+        text="secret_question",
+        font=standard_font)
+    display_password_label.pack(pady=standard_y_padding)
 
     close_button = ctk.CTkButton(
         root,
@@ -149,15 +206,14 @@ class ErrorWindow:
             command=lambda: [error_window.destroy(),self.on_close()])
         close_button.pack(pady=standard_y_padding)
 
-class LogIn:
-    def __init__(self, username_entry, password_entry):
-        self.username_entry = username_entry
-        self.password_entry = password_entry
+class CredentialsChecker:
+    def __init__(self, username, password):
+        self.username = username
+        self.password = password
 
     def username_checker(self):
         usernames = str(connection.cursor().execute("SELECT Username FROM Accounts").fetchall()).replace("(","").replace(")","").replace("'","").replace(",","").replace(" ",",")
-        username = self.username_entry.get()
-        if username not in usernames:
+        if self.username not in usernames:
             username_in_usernames = False
             return username_in_usernames
         else:
@@ -165,10 +221,8 @@ class LogIn:
             return username_in_usernames
         
     def password_checker(self):
-        username = self.username_entry.get()
-        password = self.password_entry.get()
-        database_password = connection.cursor().execute(f"SELECT Password FROM Accounts WHERE Username= '{username}'").fetchone()[0]
-        if password != database_password:
+        database_password = connection.cursor().execute(f"SELECT Password FROM Accounts WHERE Username= '{self.username}'").fetchone()[0]
+        if self.password != database_password:
             correct_password = False
             return correct_password
         else:
@@ -183,6 +237,10 @@ class SecretQuestion:
         secret_question = connection.cursor().execute(f"SELECT Secret_Question FROM Accounts WHERE Username = '{self.username}'").fetchone()
         return secret_question
     
+    def get_secret_question_answer(self):
+        secret_question_answer = connection.cursor().execute(f"SELECT Secret_Question_Answer FROM Accounts WHERE Username = '{self.username}'").fetchone()
+        return secret_question_answer
+    
     
 
 
@@ -190,22 +248,32 @@ def main(button_type):
     for widget in root.winfo_children():
         widget.destroy()
 
-    button_value = button_type[0]
-    username_entry = button_type[1]
-    password_entry = button_type[2]
-    other_value = button_type[3]
-
-    log_in_1 = LogIn(username_entry, password_entry)
-    log_in_2 = LogIn(username_entry, password_entry)
-    error_window_1 = ErrorWindow(root, "Your password or username was incorect.\nPlease go back and try again.", lambda: log_in_window())
-    error_window_2 = ErrorWindow(root, "We encountered a problem, please try again.", lambda: log_in_window())
-
     if button_type == None:
         log_in_window()
     else:    
+        button_value = button_type[0]
+        username = button_type[1]
+        password = button_type[2]
+        other_value_1 = button_type[3]
+        secret_question_entry = button_type[4]
+
+        print(button_type)
+        print(button_value)
+        print(username)
+        print(password)
+        print(other_value_1)
+        print(secret_question_entry)
+
+        credentials_checker_1 = CredentialsChecker(username, password)
+        credentials_checker_2 = CredentialsChecker(username, password)
+        error_window_1 = ErrorWindow(root, "Your password or username was incorect.\nPlease go back and try again.", lambda: log_in_window())
+        error_window_2 = ErrorWindow(root, "We encountered a problem, please try again.", lambda: log_in_window())
+        error_window_3 = ErrorWindow(root, "Your secret question answer was incorect.\nPlease go back and try again.", lambda: log_in_window())
+        secret_question_1 = SecretQuestion(username)
+
         if button_value == "login":
-            if log_in_1.username_checker() == True:
-                if log_in_2.password_checker() == True:
+            if credentials_checker_1.username_checker() == True:
+                if credentials_checker_2.password_checker() == True:
                     print("yay1")
                 else:
                     error_window_1.create()
@@ -213,10 +281,23 @@ def main(button_type):
                 error_window_1.create()
 
         elif button_value == "forgot_password":
-            if other_value == "N/A":
+            if other_value_1 == "N/A":
                 forgot_password_window()
-            elif other_value == "continue":
-                pass
+            elif other_value_1 == "continue":
+                if credentials_checker_1.username_checker() == True:
+                    secret_question = str(secret_question_1.get_secret_question()).replace("(","").replace("'","").replace(",","").replace(")","")
+                    secret_question_answer = str(secret_question_1.get_secret_question_answer()).replace("(","").replace("'","").replace(",","").replace(")","")
+                    print(secret_question_answer)
+                    if secret_question_entry == "N/A":
+                        secret_question_window(secret_question)
+                    elif secret_question_entry != secret_question_answer:
+                        error_window_3.create()
+                    elif secret_question_entry == secret_question_answer:
+                        print("yayyyyyyyyyy")
+                    else:
+                        error_window_2.create()
+                else: 
+                    error_window_1.create()
             else:
                 error_window_2.create()
         else:

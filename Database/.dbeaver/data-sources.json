@@ -13,19 +13,6 @@
 				"type": "dev",
 				"auth-model": "native"
 			}
-		},
-		"sqlite_jdbc-18dcababb75-2d5771b001ee8fcd": {
-			"provider": "sqlite",
-			"driver": "sqlite_jdbc",
-			"name": "505_ACU_Q-Store_Database.db 2",
-			"save-password": true,
-			"configuration": {
-				"database": "F:\\Q-Store\\505ACU_Q_Store_Program\\505_ACU_Q-Store_Database.db",
-				"url": "jdbc:sqlite:F:\\Q-Store\\505ACU_Q_Store_Program\\505_ACU_Q-Store_Database.db",
-				"configurationType": "MANUAL",
-				"type": "dev",
-				"auth-model": "native"
-			}
 		}
 	},
 	"connection-types": {
